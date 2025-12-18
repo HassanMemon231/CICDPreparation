@@ -3,8 +3,6 @@ name: CI-CD for .NET App
 on:
   push:
     branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
 
 jobs:
   build:
@@ -14,28 +12,19 @@ jobs:
     - name: Checkout Source Code
       uses: actions/checkout@v4
 
-    - name: Setup .NET SDK
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: '9.0.x'
-
     - name: Restore Dependencies
       run: dotnet restore
 
     - name: Build Application
-      run: dotnet build --configuration Release --no-restore
+      run: dotnet build -c Release --no-restore
 
     - name: Run Unit Tests
-      run: dotnet test --no-build --verbosity normal
+      run: dotnet test --no-build
 
     - name: Publish Application
       run: dotnet publish -c Release -o ./publish
 
     - name: Deploy to IIS
-      run: |
-        xcopy ./publish "C:\inetpub\wwwroot\MyDotNetApp" /Y /E
-        
-    - name: Start IIS Website
       shell: cmd
       run: |
-        %windir%\system32\inetsrv\appcmd start site "Default Web Site"
+        xcopy /Y /E /I ./publish "C:\inetpub\wwwroot\MyDotNetApp"
