@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     steps:
     - name: Checkout Source Code
@@ -27,3 +27,15 @@ jobs:
 
     - name: Run Unit Tests
       run: dotnet test --no-build --verbosity normal
+
+    - name: Publish Application
+      run: dotnet publish -c Release -o ./publish
+
+    - name: Deploy to IIS
+      run: |
+        xcopy ./publish "C:\inetpub\wwwroot\MyDotNetApp" /Y /E
+        
+    - name: Start IIS Website
+      shell: cmd
+      run: |
+        %windir%\system32\inetsrv\appcmd start site "Default Web Site"
